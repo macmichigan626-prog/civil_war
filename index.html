@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Архив мёртвых: Дело № 1918</title>
+<style>
+:root{--gold:#c9a45c;--paper:#d9c99b;--ink:#2b1d0e;--blood:#8b1a1a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden;font-family:Georgia,"Times New Roman",serif;color:#e8dcc0;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;color:inherit}
+#app{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;inset:0;background:#000}
+#stage.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-1.2vmin,.5vmin)}40%{transform:translate(1.2vmin,-.5vmin)}60%{transform:translate(-.8vmin,-.4vmin)}80%{transform:translate(.8vmin,.4vmin)}}
+#bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,var(--c1) 0,var(--c2) 58%,#020304 100%)}
+#bg::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30%;background:linear-gradient(#0000,#000b),repeating-linear-gradient(90deg,#ffffff0a 0 2px,#0000 2px 8vw),linear-gradient(var(--f1),var(--f2))}
+#stage.r1{--c1:#21474e;--c2:#0c1b21;--f1:#18242a;--f2:#070b0e}
+#stage.r2{--c1:#4a3420;--c2:#1c120a;--f1:#2a1d12;--f2:#0b0705}
+#stage.r3{--c1:#2f3d33;--c2:#101812;--f1:#1c241e;--f2:#060907}
+#stage.r4{--c1:#202a52;--c2:#0a0e22;--f1:#171a26;--f2:#050509}
+#decor,#items,#ghosts{position:absolute;inset:0}
+#decor{pointer-events:none}
+#ghosts{pointer-events:none;overflow:hidden}
+#fx{position:absolute;inset:0;pointer-events:none}
+#dark{position:absolute;inset:0;pointer-events:none;--mx:50%;--my:55%;background:radial-gradient(circle at var(--mx) var(--my),#0000 0,#0000 11vmax,rgba(0,0,0,.5) 30vmax,rgba(0,0,0,.8) 62vmax);animation:flick 5s infinite;transition:opacity 1.5s}
+#stage.found #dark{opacity:.7}
+#stage.lit #dark{opacity:.4;animation:none}
+@keyframes flick{0%,100%{opacity:1}8%{opacity:.93}9%{opacity:1}47%{opacity:.96}50%{opacity:.86}52%{opacity:1}}
+#stage.found.lit #dark{opacity:.4}
+#vig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 18vmax #000,inset 0 0 4vmax #000}
+#flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:#fff;transition:opacity .5s}
+/* свечи */
+.candle{position:absolute;width:1.7vmin;height:6vmin;transform:translate(-50%,-100%)}
+.candle .w{position:absolute;bottom:0;left:0;right:0;height:72%;background:linear-gradient(90deg,#c9b98a,#efe3bd,#a99a6c);border-radius:2px}
+.candle .f{position:absolute;left:50%;bottom:70%;width:1.1vmin;height:2.4vmin;margin-left:-.55vmin;background:radial-gradient(ellipse at 50% 72%,#fff6c8,#ffb43a 55%,#0000 72%);border-radius:50% 50% 50% 50%/62% 62% 38% 38%;animation:fl .16s infinite alternate}
+.candle .g{position:absolute;left:50%;bottom:55%;width:20vmin;height:20vmin;margin:0 0 -10vmin -10vmin;background:radial-gradient(circle,#ffb43a40,#0000 65%);animation:glow 2.3s infinite alternate}
+@keyframes fl{from{transform:scale(1,1) rotate(-3deg)}to{transform:scale(.88,1.1) rotate(3deg)}}
+@keyframes glow{from{opacity:.65}to{opacity:1}}
+.wm{position:absolute;border:.7vmin solid #6b5a33;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7fa6a855,#0a1519 70%);box-shadow:inset 0 0 2vmin #000,0 0 2vmin #0008}
+.wm.g::after{content:"";position:absolute;left:30%;top:25%;width:40%;height:60%;background:radial-gradient(ellipse at 50% 30%,#000 0,#000 30%,#0000 70%);opacity:.8;animation:ghostin 6s infinite}
+@keyframes ghostin{0%,60%{opacity:0}75%,85%{opacity:.7}100%{opacity:0}}
+.arch{position:absolute;border:.6vmin solid #0006;border-bottom:0;border-radius:50% 50% 0 0/38% 38% 0 0;background:linear-gradient(#0000,#0004)}
+.win{position:absolute;border:.8vmin solid #1b150e;background:radial-gradient(circle at 70% 30%,#dfe8ff 0,#7f93c8 6%,#1a2347 22%,#080c1d 70%);box-shadow:0 0 5vmin #8aa0e033}
+.win::before,.win::after{content:"";position:absolute;background:#1b150e}
+.win::before{left:50%;top:0;bottom:0;width:.6vmin;margin-left:-.3vmin}.win::after{top:50%;left:0;right:0;height:.6vmin}
+.shelf{position:absolute;background:repeating-linear-gradient(90deg,#2b1a0d 0 .7vmin,#4a2f18 .7vmin 1.4vmin,#1d1209 1.4vmin 2.1vmin,#3d2613 2.1vmin 3vmin);border:.5vmin solid #120a05;opacity:.85}
+.wclock{position:absolute;width:15vmin;height:15vmin;transform:translate(-50%,-50%)}
+.wclock .h1{transform-origin:50px 50px;animation:rev 8s linear infinite}.wclock .h2{transform-origin:50px 50px;animation:rev 96s linear infinite}
+@keyframes rev{to{transform:rotate(-360deg)}}
+.lamp{position:absolute;width:8vmin;transform:translateX(-50%)}
+.lamp .cord{width:2px;height:12vmin;background:#000;margin:0 auto}
+.lamp .shade{height:5vmin;border-radius:50% 50% 8% 8%;background:linear-gradient(#3e4a3d,#1b221b);border:1px solid #0008;position:relative}
+.lamp .bulb{position:absolute;left:50%;top:100%;width:3vmin;height:3vmin;margin-left:-1.5vmin;border-radius:50%;background:#2c2c24;transition:.8s}
+.lamp.lit .bulb{background:#ffe9a8;box-shadow:0 0 6vmin 3vmin #ffd36baa}
+.lamp .beam{position:absolute;left:50%;top:100%;width:30vmin;height:55vmin;margin-left:-15vmin;background:linear-gradient(#ffd36b00,#ffd36b00);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);transition:1s}
+.lamp.lit .beam{background:linear-gradient(#ffd36b33,#ffd36b00)}
+.desk{position:absolute;background:linear-gradient(#2a1e12,#0c0804);border-top:.5vmin solid #4d3a22}
+.fog{position:absolute;left:-30%;width:160%;height:35%;background:radial-gradient(ellipse at 50% 60%,#9fb0d044,#0000 68%);animation:fogm 24s linear infinite alternate;pointer-events:none}
+@keyframes fogm{from{transform:translateX(-8%)}to{transform:translateX(8%)}}
+.door{position:absolute;border:1vmin solid #1d140b;border-bottom:0;background:linear-gradient(90deg,#241709,#3b2812 50%,#241709);border-radius:50% 50% 0 0/22% 22% 0 0;overflow:hidden;transition:.5s}
+.door::before{content:"";position:absolute;left:0;top:0;bottom:0;right:0;background:#fff3c8;opacity:0;transition:opacity 1.6s}
+.door.open::before{opacity:1;box-shadow:0 0 12vmin #fff3c8 inset}
+.door .lk{position:absolute;left:50%;top:55%;width:3vmin;height:3vmin;border-radius:50%;border:.5vmin solid var(--gold);margin-left:-1.5vmin;transition:.5s}
+.door.open .lk{opacity:0}
+.train{position:absolute;opacity:.85}
+.hl{animation:glow 1.8s infinite alternate}
+/* предметы */
+.item{position:absolute;transform:translate(-50%,-50%);background:none;border:0;cursor:pointer;width:var(--w);aspect-ratio:1/1;filter:drop-shadow(0 .6vmin 1vmin #000);transition:transform .25s,filter .25s}
+.item.tall{aspect-ratio:100/130}
+.item svg{width:100%;height:100%;overflow:visible;display:block}
+.item:hover,.item:focus-visible{transform:translate(-50%,-50%) scale(1.07);filter:drop-shadow(0 0 1.8vmin #ffc65a) brightness(1.3);outline:none}
+.item.new{animation:pulse 2.6s infinite}
+@keyframes pulse{0%,100%{filter:drop-shadow(0 .6vmin 1vmin #000) drop-shadow(0 0 .4vmin #ffc65a66)}50%{filter:drop-shadow(0 .6vmin 1vmin #000) drop-shadow(0 0 2.2vmin #ffc65acc)}}
+.item .lbl{position:absolute;left:50%;top:100%;transform:translateX(-50%);white-space:nowrap;font-size:max(13px,1.8vmin);background:#000c;padding:.25em .7em;border:1px solid #c9a45c66;opacity:0;transition:.2s;pointer-events:none;margin-top:.4vmin}
+.item:hover .lbl,.item:focus-visible .lbl{opacity:1}
+.item.read::after{content:"✓";position:absolute;right:2%;top:2%;color:#9fe29f;font-size:2.4vmin;text-shadow:0 0 6px #000}
+/* HUD */
+#hud{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;padding:1.4vmin 2vmin;z-index:20;pointer-events:none;background:linear-gradient(#000c,#0000)}
+#hud>*{pointer-events:auto}
+#rt{font-size:clamp(14px,2.3vmin,24px);color:var(--gold);letter-spacing:.06em}
+#rs{font-size:clamp(11px,1.7vmin,16px);opacity:.7;font-style:italic;margin-top:.3em}
+#seals{display:flex;gap:1.2vmin}
+.seal{width:5.6vmin;height:5.6vmin;min-width:34px;min-height:34px;border-radius:50%;border:1px dashed #c9a45c88;display:flex;align-items:center;justify-content:center;font-size:2vmin;color:#c9a45c88;background:#0007}
+.seal svg{width:100%;height:100%;filter:drop-shadow(0 0 1vmin #c0392b);animation:pop .8s}
+@keyframes pop{from{transform:scale(2.4);opacity:0}to{transform:none;opacity:1}}
+#hr{display:flex;align-items:center;gap:1.2vmin}
+#clk{display:flex;align-items:center;gap:.8vmin;font-family:"Courier New",monospace;color:#c9a45c;font-size:clamp(12px,2vmin,20px)}
+#clk svg{width:4.6vmin;height:4.6vmin;min-width:28px;min-height:28px}
+.ib{background:#000a;border:1px solid #c9a45c88;border-radius:50%;width:5vmin;height:5vmin;min-width:34px;min-height:34px;font-size:2.2vmin;cursor:pointer}
+.ib:hover{box-shadow:0 0 12px #c9a45c88}
+/* кнопки */
+.btn{background:linear-gradient(#3a2a12,#1d1409);border:1px solid var(--gold);color:#f0dfb2;padding:.6em 1.2em;font-size:1em;cursor:pointer;letter-spacing:.04em;border-radius:3px;transition:.2s}
+.btn:hover{box-shadow:0 0 14px #c9a45c88;filter:brightness(1.2)}
+.btn.ghostb{background:#0007;border-color:#c9a45c77}
+.btn.big{font-size:clamp(16px,2.6vmin,26px);padding:.7em 1.8em}
+#pz,#next{position:absolute;bottom:2.4vmin;z-index:25;font-size:clamp(14px,2.1vmin,20px);display:none}
+#pz{left:2.4vmin;animation:pulse2 2s infinite}
+#pz.dim{animation:none;opacity:.7}
+#next{right:2.4vmin;animation:pulse2 1.6s infinite}
+@keyframes pulse2{0%,100%{box-shadow:0 0 4px #c9a45c55}50%{box-shadow:0 0 22px #ffc65acc}}
+/* Хранитель */
+#keeper{position:absolute;left:50%;bottom:2vmin;width:min(900px,94vw);transform:translate(-50%,130%);z-index:40;display:flex;gap:2vmin;align-items:center;background:linear-gradient(#0d0a0ef2,#050404f7);border:1px solid #c9a45caa;padding:1.6vmin 2.4vmin;box-shadow:0 0 5vmin #000,0 0 3vmin #7fd0d422;transition:transform .5s;border-radius:4px}
+#keeper.show{transform:translate(-50%,0)}
+#kav{width:9vmin;min-width:60px;flex:none;filter:drop-shadow(0 0 1.4vmin #7fe0e0aa);animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-.8vmin)}}
+#kbody{flex:1}
+#kname{color:#7fd0d4;font-size:clamp(12px,1.7vmin,16px);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.4em}
+#ktext{font-size:clamp(15px,2.2vmin,21px);line-height:1.5;min-height:3em;color:#eadfc4}
+#knext{margin-top:.6em;float:right}
+/* оверлеи */
+.overlay{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.74);display:flex;align-items:center;justify-content:center;padding:2vmin;opacity:0;transition:opacity .25s}
+.overlay.show{opacity:1}
+.box{max-height:94vh;max-width:min(940px,96vw);width:100%;overflow:auto;transform:translateY(2vmin) scale(.97);transition:transform .25s}
+.overlay.show .box{transform:none}
+.doc{position:relative;background:linear-gradient(135deg,#e6d7a8,#cdb98a 60%,#bfa873);color:var(--ink);padding:3.2vmin 4vmin;border-radius:3px;box-shadow:0 0 6vmin #000,inset 0 0 6vmin #7a5a2a88;font-size:clamp(15px,2.15vmin,20px);line-height:1.55;-webkit-user-select:text;user-select:text}
+.doc h2{font-size:1.35em;margin-bottom:.2em;letter-spacing:.03em;padding-right:5em}
+.doc .date{font-style:italic;opacity:.75;margin-bottom:.8em;border-bottom:1px solid #5a3d1a55;padding-bottom:.5em}
+.doc p{margin:.55em 0}
+.doc ul{margin:.4em 0 .4em 1.3em}
+mark{background:#e2b94c88;color:inherit;padding:0 .15em}
+.stamp{position:absolute;right:3vmin;top:2.4vmin;border:2px solid var(--blood);color:var(--blood);padding:.1em .5em;transform:rotate(7deg);font-weight:bold;letter-spacing:.15em;opacity:.75;font-size:.8em}
+.doc .btn{margin-top:1em}
+.pz{background:linear-gradient(#17120d,#0d0a07);border:1px solid var(--gold);box-shadow:0 0 5vmin #000,0 0 3vmin #c9a45c33;padding:3vmin;border-radius:4px;font-size:clamp(15px,2.1vmin,19px)}
+.pz h2{color:var(--gold);letter-spacing:.06em;margin-bottom:.4em;font-size:1.4em}
+.pz .ins{opacity:.9;line-height:1.5;margin-bottom:1em}
+.pz .row{display:flex;gap:1vmin;flex-wrap:wrap;margin-top:1em}
+.fb{min-height:3.2em;margin-top:.8em;padding:.6em .9em;border-left:3px solid #7fd0d4;background:#0a1a1c;line-height:1.45;display:none}
+.fb.show{display:block}.fb.bad{border-color:#c0392b;background:#220d0d;color:#ffd9d0}.fb.ok{border-color:#58b368;background:#0d2112;color:#d3ffd9}
+.shards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.4vmin}
+.shw{transition:filter .2s}
+.shw.sel{filter:drop-shadow(0 0 .9vmin #ffd36b)}
+.shard{width:100%;min-height:11vmin;padding:2vmin 2.4vmin;border:0;cursor:pointer;font-size:1em;line-height:1.35;text-align:left;background:linear-gradient(135deg,#2b4a54,#11262d);color:#d9f0f2;transition:.2s}
+.shw.sel .shard{background:linear-gradient(135deg,#b58a2d,#6f4d12);color:#fff7dc}
+.shard:hover{filter:brightness(1.25)}
+.s0{clip-path:polygon(0 0,100% 6%,94% 100%,4% 92%)}.s1{clip-path:polygon(6% 0,100% 0,96% 94%,0 100%)}.s2{clip-path:polygon(0 8%,92% 0,100% 100%,8% 96%)}.s3{clip-path:polygon(4% 4%,98% 0,100% 90%,0 100%)}.s4{clip-path:polygon(0 0,96% 8%,100% 100%,6% 94%)}.s5{clip-path:polygon(8% 0,100% 6%,92% 100%,0 92%)}
+.cnt{margin-top:1vmin;opacity:.8}
+.timeline{display:flex;align-items:stretch;gap:1vmin;margin-bottom:1.4vmin}
+.timeline>span{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;color:var(--gold);font-size:.85em;letter-spacing:.2em}
+#slots{display:grid;grid-template-columns:repeat(4,1fr);gap:1vmin;flex:1}
+.slot{min-height:15vmin;border:2px dashed #c9a45c66;display:flex;align-items:center;justify-content:center;border-radius:3px;position:relative;background:#0006}
+.slot>i{font-size:3vmin;opacity:.35;font-style:normal}
+.slot .card{width:100%;height:100%}
+#pool{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1vmin}
+.card{background:linear-gradient(135deg,#d6c694,#b8a56f);color:var(--ink);padding:1.2vmin 1.4vmin;cursor:pointer;font-size:.92em;line-height:1.4;border-radius:2px;box-shadow:0 .4vmin 1vmin #000;transition:.2s;text-align:left}
+.card:hover{transform:translateY(-.4vmin);filter:brightness(1.1)}
+.card b{display:block;color:var(--blood);margin-bottom:.2em;letter-spacing:.06em}
+.cloze{line-height:2.4;font-size:1.05em;background:#0008;padding:2vmin;border:1px solid #c9a45c44}
+.cloze select{font-family:inherit;font-size:.95em;background:#201808;color:#ffe9b0;border:1px solid var(--gold);padding:.15em .3em;margin:0 .2em;max-width:100%}
+.cloze select.ok{background:#12301a;color:#d3ffd9;border-color:#58b368}
+.cloze select.bad{background:#3a1212;border-color:#c0392b}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:1.4vmin 3vmin}
+.mt{padding:1.2vmin 1.6vmin;border:1px solid #c9a45c88;background:#150f08;cursor:pointer;line-height:1.4;transition:.2s;border-radius:3px;position:relative}
+.mt:hover{filter:brightness(1.3)}
+.mt.sel{background:#4d3811;box-shadow:0 0 12px #ffc65a99}
+.mt.ok{background:#12301a;border-color:#58b368;cursor:default}
+.mt.ok::after{content:attr(data-n);position:absolute;right:.6em;top:.3em;color:#58b368;font-weight:bold}
+.mt.l{font-weight:bold;color:#f0dfb2}
+.mt.r{font-size:.95em}
+/* прочее */
+#veil{position:absolute;inset:0;background:#000;z-index:70;pointer-events:none;opacity:0;transition:opacity .7s}
+#veil.on{opacity:1;pointer-events:auto}
+#sealfx{position:absolute;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle,#000a,#000d);text-align:center}
+#sealfx.show{display:flex;animation:fadein .5s}
+#sealfx .big{width:min(34vmin,260px);animation:seal 1.2s cubic-bezier(.2,1.4,.4,1);filter:drop-shadow(0 0 4vmin #c0392b)}
+#sealfx h3{margin-top:2vmin;color:var(--gold);font-size:clamp(18px,3.2vmin,32px);letter-spacing:.1em}
+@keyframes seal{from{transform:scale(3) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+#toast{position:absolute;left:50%;top:12vmin;transform:translateX(-50%);z-index:55;background:#000d;border:1px solid var(--gold);padding:.7em 1.2em;font-size:clamp(14px,2vmin,19px);opacity:0;pointer-events:none;transition:opacity .4s;text-align:center;max-width:90vw}
+#toast.show{opacity:1}
+.ghost{position:absolute;left:-14%;width:14vmin;height:26vmin;opacity:0;animation:gmove linear forwards;filter:blur(.5px) drop-shadow(0 0 2vmin #9fe8ff55)}
+@keyframes gmove{0%{left:-14%;opacity:0}15%{opacity:.4}50%{opacity:.18}85%{opacity:.4}100%{left:112%;opacity:0}}
+.whisper{position:absolute;color:#cfe8ea;font-size:clamp(18px,3.4vmin,36px);font-style:italic;letter-spacing:.15em;opacity:0;animation:wh 4s forwards;text-shadow:0 0 12px #6fd;pointer-events:none}
+@keyframes wh{0%{opacity:0;transform:scale(.95)}25%{opacity:.55}100%{opacity:0;transform:scale(1.15)}}
+.screen{position:absolute;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:3vmin;background:radial-gradient(ellipse at 50% 40%,#16282c,#04090b 70%)}
+#title h1{font-size:clamp(30px,8vmin,84px);letter-spacing:.1em;color:#d9c48c;text-shadow:0 0 3vmin #c9a45c66;animation:tflick 6s infinite;line-height:1.1}
+#title h1 small{display:block;font-size:.45em;color:#b04030;letter-spacing:.4em;margin-top:.3em}
+@keyframes tflick{0%,100%{opacity:1}30%{opacity:.95}31%{opacity:.4}32%{opacity:1}70%{opacity:.9}71%{opacity:.5}73%{opacity:1}}
+#title p{max-width:760px;margin:2.4vmin 0;line-height:1.55;font-size:clamp(14px,2.3vmin,22px);opacity:.88}
+#title .sm{font-size:clamp(12px,1.8vmin,16px);opacity:.55;margin-top:2vmin}
+#cine{background:#000;z-index:75;display:none}
+#cl{max-width:820px;font-size:clamp(18px,3vmin,30px);line-height:1.6;color:#d9cba5;min-height:6em;display:flex;align-items:center}
+#cine .sk{position:absolute;bottom:3vmin;opacity:.5;font-size:clamp(12px,1.8vmin,16px)}
+#end{display:none;overflow:auto;justify-content:flex-start;background:radial-gradient(ellipse at 50% 20%,#2a2410,#050403 75%)}
+#end h1{color:var(--gold);font-size:clamp(26px,6vmin,60px);letter-spacing:.08em;margin-top:2vmin}
+#end .ch{max-width:820px;text-align:left;line-height:1.55;font-size:clamp(14px,2.1vmin,19px);margin:1.6vmin 0}
+#end ul{margin-left:1.2em}#end li{margin:.45em 0}
+#end .st{display:flex;gap:2vmin;flex-wrap:wrap;justify-content:center;margin:1.6vmin 0}
+#end .st div{border:1px solid #c9a45c77;padding:.8em 1.4em;background:#0008}
+#end .st b{display:block;font-size:1.6em;color:var(--gold)}
+#end h3{color:var(--gold);margin-top:1.4em}
+@media (max-width:640px){.match{grid-template-columns:1fr}#seals{gap:.6vmin}#hud{flex-wrap:wrap;gap:1vmin}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:0s!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage" class="r1">
+    <div id="bg"></div><div id="decor"></div><div id="items"></div><div id="ghosts"></div>
+    <canvas id="fx"></canvas><div id="dark"></div><div id="vig"></div><div id="flash"></div>
+  </div>
+  <div id="hud" style="display:none">
+    <div><div id="rt"></div><div id="rs"></div></div>
+    <div id="seals"></div>
+    <div id="hr">
+      <div id="clk"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#0009" stroke="#c9a45c" stroke-width="1.5"/><g stroke="#c9a45c" stroke-linecap="round"><line class="ch1" x1="20" y1="20" x2="20" y2="8" stroke-width="1.6" style="transform-origin:20px 20px;animation:rev 6s linear infinite"/><line x1="20" y1="20" x2="20" y2="12" stroke-width="2.2" style="transform-origin:20px 20px;animation:rev 72s linear infinite"/></g></svg><span id="ct">23:59:59</span></div>
+      <button class="ib" id="bj" title="Дневник находок">📜</button>
+      <button class="ib" id="bs" title="Звук">🔊</button>
+    </div>
+  </div>
+  <button class="btn" id="pz"></button>
+  <button class="btn" id="next"></button>
+  <div id="keeper">
+    <svg id="kav" viewBox="0 0 100 120"><defs><radialGradient id="kg" cx="50%" cy="40%"><stop offset="0" stop-color="#5a7f86"/><stop offset="1" stop-color="#0c181c"/></radialGradient></defs><path d="M50 6C28 8 20 30 22 52c1 14-6 26-14 64h84c-8-38-15-50-14-64 2-22-6-44-28-46z" fill="url(#kg)" opacity=".92"/><ellipse cx="50" cy="48" rx="15" ry="19" fill="#02080a"/><circle cx="44" cy="46" r="3" fill="#aff"/><circle cx="56" cy="46" r="3" fill="#aff"/><path d="M8 116c10 6 18-2 28 4s16-4 28 0 20-8 28-4" fill="none" stroke="#7fd0d455" stroke-width="2"/></svg>
+    <div id="kbody"><div id="kname">Хранитель архива</div><div id="ktext"></div><button class="btn" id="knext">Далее ▸</button></div>
+  </div>
+  <div id="sealfx"></div>
+  <div id="toast"></div>
+  <div id="veil"></div>
+
+  <div id="cine" class="screen"><div id="cl"></div><div class="sk">Нажми, чтобы продолжить</div></div>
+
+  <div id="title" class="screen">
+    <h1>АРХИВ МЕРТВЫХ<small>ДЕЛО № 1918</small></h1>
+    <p>31 октября. Заброшенный архив. Двери захлопнулись, часы идут назад, а документы шепчут. Из исторической памяти исчезли события 1917–1918 годов. Восстанови четыре дела, получи четыре печати и открой последнюю дверь.</p>
+    <button class="btn big" id="start">Войти в архив</button>
+    <div class="sm">Тема: «Начало Гражданской войны в России» · 12–15 минут · все ответы спрятаны в документах внутри игры · лучше с включённым звуком · двигай мышью — это твой фонарь</div>
+  </div>
+
+  <div id="end" class="screen"></div>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const ROM=['I','II','III','IV'];
+
+/* ---------------- ЗВУК ---------------- */
+const AU={ctx:null,on:true,out:null,noise:null};
+function auInit(){
+  if(AU.ctx)return;
+  try{
+    const C=window.AudioContext||window.webkitAudioContext;const c=new C();AU.ctx=c;
+    AU.out=c.createGain();AU.out.gain.value=AU.on?0.7:0;AU.out.connect(c.destination);
+    const len=c.sampleRate*2;const b=c.createBuffer(1,len,c.sampleRate);const d=b.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=Math.random()*2-1;AU.noise=b;
+    const dg=c.createGain();dg.gain.value=.5;dg.connect(AU.out);
+    [[55,'sawtooth',.5],[82.5,'triangle',.5],[110.7,'sine',.35],[41.2,'sine',.8]].forEach(([f,t,v],i)=>{
+      const o=c.createOscillator();o.type=t;o.frequency.value=f;
+      const g=c.createGain();g.gain.value=v*.12;
+      const fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=260;
+      const l=c.createOscillator();l.frequency.value=.07+i*.05;
+      const lg=c.createGain();lg.gain.value=f*.012;l.connect(lg);lg.connect(o.frequency);
+      o.connect(fl);fl.connect(g);g.connect(dg);o.start();l.start();
+    });
+    const n=c.createBufferSource();n.buffer=AU.noise;n.loop=true;
+    const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=500;bp.Q.value=.6;
+    const wg=c.createGain();wg.gain.value=.05;
+    const wl=c.createOscillator();wl.frequency.value=.13;
+    const wlg=c.createGain();wlg.gain.value=300;wl.connect(wlg);wlg.connect(bp.frequency);
+    n.connect(bp);bp.connect(wg);wg.connect(AU.out);n.start();wl.start();
+  }catch(e){}
+}
+function tone(f,t0,dur,type,vol,slide){
+  const c=AU.ctx;const o=c.createOscillator(),g=c.createGain();const t=c.currentTime+t0;
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g);g.connect(AU.out);o.start(t);o.stop(t+dur+.05);
+}
+function nz(t0,dur,f,vol,q){
+  const c=AU.ctx;const s=c.createBufferSource();s.buffer=AU.noise;
+  const b=c.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=q;
+  const g=c.createGain();const t=c.currentTime+t0;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(b);b.connect(g);g.connect(AU.out);s.start(t);s.stop(t+dur+.1);
+}
+function sfx(k){
+  if(!AU.ctx||!AU.on)return;
+  try{switch(k){
+    case 'paper':nz(0,.35,3000,.25,.7);break;
+    case 'click':tone(180,0,.08,'square',.05,90);break;
+    case 'bad':tone(110,0,.5,'sawtooth',.16,55);tone(116,0,.5,'sawtooth',.1,58);break;
+    case 'good':[523,659,784,1047].forEach((f,i)=>tone(f,i*.09,1.4,'sine',.13));break;
+    case 'seal':tone(65,0,1.8,'sine',.35,40);[392,494,587,784].forEach((f,i)=>tone(f,.1+i*.12,2,'triangle',.11));break;
+    case 'creak':tone(90,0,1.1,'sawtooth',.05,160);tone(150,.1,.9,'sawtooth',.03,70);break;
+    case 'whisper':nz(0,1.6,2200,.1,.5);break;
+    case 'door':tone(50,0,1.8,'sawtooth',.18,35);nz(0,1.2,200,.3,.5);break;
+    case 'whistle':tone(520,0,1.4,'triangle',.12,500);tone(660,0,1.4,'triangle',.1,640);break;
+  }}catch(e){}
+}
+
+/* ---------------- ИКОНКИ ---------------- */
+const sv=(inner,vb)=>`<svg viewBox="${vb||'0 0 100 100'}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+const ICONS={
+ mirror:sv(`<ellipse cx="50" cy="65" rx="42" ry="58" fill="#3a2d14" stroke="#c9a45c" stroke-width="5"/><ellipse cx="50" cy="65" rx="36" ry="52" fill="#16303a"/><path d="M30 20L55 60 40 110 20 70Z" fill="#8fd0d422"/><path d="M62 15Q78 40 70 70L52 62Z" fill="#ffffff14"/><path d="M50 13L46 45 58 62 40 85 47 117M46 45L24 58M58 62L80 58M40 85L22 98" fill="none" stroke="#dff" stroke-width="1.6" opacity=".85"/>`,'0 0 100 130'),
+ mirror_ok:sv(`<ellipse cx="50" cy="65" rx="42" ry="58" fill="#3a2d14" stroke="#e0bd6a" stroke-width="5"/><ellipse cx="50" cy="65" rx="36" ry="52" fill="#1a4350"/><path d="M30 20L55 60 40 110 20 70Z" fill="#8fd0d433"/><path d="M50 40q-12 8-12 24l-6 44h36l-6-44q0-16-12-24z" fill="#05090c"/><circle cx="46" cy="58" r="1.8" fill="#9ff"/><circle cx="54" cy="58" r="1.8" fill="#9ff"/>`,'0 0 100 130'),
+ news:sv(`<g transform="rotate(-6 50 50)"><rect x="12" y="12" width="76" height="76" fill="#cdbb8a" stroke="#6b5530" stroke-width="1.5"/><rect x="18" y="18" width="64" height="11" fill="#5b4a2a"/><g stroke="#5b4a2a" stroke-width="2" opacity=".75"><path d="M18 36h30M18 42h30M18 48h30M18 54h30M18 60h30M18 66h30M54 36h28M54 42h28M54 48h28"/></g><rect x="54" y="54" width="28" height="22" fill="#8a7648"/></g>`),
+ calendar:sv(`<rect x="14" y="10" width="72" height="82" fill="#d8c89a" stroke="#6b5530" stroke-width="1.5"/><rect x="14" y="10" width="72" height="18" fill="#8b1a1a"/><g stroke="#6b5530" stroke-width=".8"><path d="M14 44h72M14 58h72M14 72h72M32 28v64M50 28v64M68 28v64"/></g><g font-family="Georgia,serif" font-size="9" fill="#3a2a14"><text x="20" y="41">8</text><text x="55" y="55">6</text><text x="37" y="69">19</text><text x="72" y="83">22</text></g><path d="M86 70l-10 22 10 0z" fill="#0b0805" opacity=".7"/>`),
+ map:sv(`<rect x="8" y="14" width="84" height="72" fill="#c9b583" stroke="#6b5530" stroke-width="1.5"/><path d="M36 14v72M64 14v72M8 50h84" stroke="#6b553055"/><path d="M12 30Q30 26 38 38T60 50Q70 66 88 62" fill="none" stroke="#5a7ea0" stroke-width="2"/><path d="M22 70L40 56 56 62 72 40" fill="none" stroke="#b02a1a" stroke-width="2" stroke-dasharray="3 3"/><g fill="#b02a1a"><circle cx="40" cy="56" r="3.5"/><circle cx="72" cy="40" r="3.5"/><circle cx="22" cy="70" r="3.5"/></g><path d="M52 24l10 10m0-10L52 34" stroke="#5a1010" stroke-width="2"/>`),
+ portraits:sv(`<g><rect x="6" y="14" width="40" height="56" fill="#24180c" stroke="#c9a45c" stroke-width="3"/><circle cx="26" cy="36" r="8" fill="#0a0705"/><path d="M12 68q2-20 14-20t14 20z" fill="#0a0705"/><rect x="54" y="26" width="40" height="56" fill="#24180c" stroke="#c9a45c" stroke-width="3"/><circle cx="74" cy="48" r="8" fill="#0a0705"/><path d="M60 80q2-20 14-20t14 20z" fill="#0a0705"/><g fill="#8fe8ee"><circle cx="23" cy="36" r="1.2"/><circle cx="29" cy="36" r="1.2"/><circle cx="71" cy="48" r="1.2"/><circle cx="77" cy="48" r="1.2"/></g></g>`),
+ papers:sv(`<g transform="rotate(-4 50 50)"><rect x="14" y="28" width="60" height="52" fill="#c4b27e" stroke="#6b5530"/><rect x="20" y="22" width="60" height="52" fill="#d3c28f" stroke="#6b5530" transform="rotate(5 50 50)"/><g stroke="#5b4a2a" opacity=".7" stroke-width="1.6"><path d="M28 36h40M28 44h40M28 52h28" transform="rotate(5 50 50)"/></g><circle cx="66" cy="62" r="8" fill="#8b1a1a"/></g><rect x="72" y="62" width="14" height="18" rx="3" fill="#10161c" stroke="#555"/><path d="M79 62v-8" stroke="#ccc" stroke-width="2"/>`),
+ telegram:sv(`<rect x="6" y="50" width="88" height="34" rx="4" fill="#2c2418" stroke="#6b5530"/><path d="M12 50Q18 14 40 18T74 28 88 12" fill="none" stroke="#d9c99b" stroke-width="10" stroke-linecap="round"/><path d="M12 50Q18 14 40 18T74 28 88 12" fill="none" stroke="#5b4a2a" stroke-width="1.6" stroke-dasharray="1 5 6 4"/><circle cx="24" cy="68" r="6" fill="#c9a45c"/><circle cx="46" cy="68" r="6" fill="#c9a45c"/><rect x="62" y="62" width="22" height="12" fill="#14100a"/>`),
+ rail:sv(`<rect x="6" y="16" width="88" height="68" fill="#bca978" stroke="#6b5530" stroke-width="1.5"/><path d="M6 68L94 36M6 76L94 44" stroke="#2a2218" stroke-width="2.4"/><g stroke="#3b2d18" stroke-width="2"><path d="M18 64l4 14M30 60l4 14M42 56l4 14M54 52l4 14M66 48l4 14M78 44l4 14"/></g><g fill="#2f6b4a" transform="rotate(-20 40 52)"><rect x="28" y="40" width="12" height="8"/><rect x="42" y="40" width="12" height="8"/><rect x="56" y="40" width="12" height="8"/></g><g fill="#b02a1a"><circle cx="20" cy="30" r="3"/><circle cx="62" cy="26" r="3"/><circle cx="84" cy="64" r="3"/></g>`),
+ tickets:sv(`<g transform="rotate(-8 40 50)"><path d="M8 28h70v18a5 5 0 000 10v10H8V56a5 5 0 000-10z" fill="#d6c694" stroke="#6b5530"/><path d="M52 28v38" stroke="#6b5530" stroke-dasharray="3 3"/><text x="14" y="50" font-size="11" font-family="Georgia" fill="#5a1010">№ 1918</text></g><g transform="rotate(7 60 60)"><path d="M26 54h66v18a5 5 0 000 10v10H26V82a5 5 0 000-10z" fill="#c4b27e" stroke="#6b5530"/><text x="34" y="76" font-size="10" font-family="Georgia" fill="#5a1010">ВАГОН</text></g>`),
+ plaque:sv(`<rect x="8" y="22" width="84" height="56" rx="6" fill="#8a6a2a" stroke="#d6b25a" stroke-width="3"/><g fill="#d6b25a"><circle cx="15" cy="29" r="2"/><circle cx="85" cy="29" r="2"/><circle cx="15" cy="71" r="2"/><circle cx="85" cy="71" r="2"/></g><g fill="#2a1d08"><rect x="26" y="44" width="40" height="14" rx="3"/><rect x="62" y="38" width="12" height="20"/><rect x="30" y="36" width="8" height="10"/><circle cx="32" cy="62" r="5"/><circle cx="48" cy="62" r="5"/><circle cx="64" cy="62" r="5"/></g>`),
+ book:sv(`<rect x="12" y="20" width="76" height="62" rx="3" fill="#2a1a10" stroke="#c9a45c" stroke-width="2"/><rect x="18" y="26" width="64" height="50" fill="none" stroke="#c9a45c" stroke-width="1" opacity=".7"/><text x="50" y="56" text-anchor="middle" font-size="12" font-family="Georgia" fill="#c9a45c">ЖУРНАЛ</text><path d="M66 82v14l5-4 5 4V82" fill="#8b1a1a"/>`)
+};
+const SEALSVG=n=>`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#8b1a1a"/><circle cx="50" cy="50" r="44" fill="none" stroke="#c0392b" stroke-width="4" stroke-dasharray="3 3"/><circle cx="50" cy="50" r="32" fill="none" stroke="#e8a090" stroke-width="2"/><text x="50" y="62" text-anchor="middle" font-size="32" font-family="Georgia,serif" fill="#f3c9bd" font-weight="bold">${ROM[n]}</text></svg>`;
+
+/* ---------------- ДЕКОР ---------------- */
+const candle=(x,y,s)=>`<div class="candle" style="left:${x}%;top:${y}%;transform:translate(-50%,-100%) scale(${s||1})"><span class="g"></span><span class="w"></span><span class="f"></span></div>`;
+const wm=(x,y,w,h,g)=>`<div class="wm ${g?'g':''}" style="left:${x}%;top:${y}%;width:${w}vmin;height:${h}vmin"></div>`;
+const DECOR={
+ 1:()=>wm(8,18,10,15,0)+wm(20,10,8,12,1)+wm(80,14,9,14,0)+wm(91,26,8,12,1)+wm(70,8,6,9,0)+
+     `<div class="arch" style="left:3%;top:6%;width:30%;height:66%"></div><div class="arch" style="left:67%;top:6%;width:30%;height:66%"></div>`+
+     candle(12,86,1.3)+candle(88,88,1.3)+candle(30,92,1)+candle(70,91,1)+candle(50,96,.9),
+ 2:()=>`<div class="shelf" style="left:0;top:8%;width:11%;height:70%"></div><div class="shelf" style="right:0;top:8%;width:9%;height:70%"></div>`+
+     `<div class="win" style="left:78%;top:10%;width:11vmin;height:18vmin"></div>`+
+     `<div class="wclock" style="left:50%;top:15%"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#1a120a" stroke="#c9a45c" stroke-width="4"/><g stroke="#c9a45c" stroke-width="2"><path d="M50 8v8M50 84v8M8 50h8M84 50h8"/></g><line class="h1" x1="50" y1="50" x2="50" y2="14" stroke="#e8d9a8" stroke-width="2.4" stroke-linecap="round"/><line class="h2" x1="50" y1="50" x2="50" y2="26" stroke="#e8d9a8" stroke-width="4" stroke-linecap="round"/></svg></div>`+
+     candle(40,88,1.2)+candle(64,86,1.1)+candle(14,80,1)+candle(90,82,1),
+ 3:()=>`<div class="win" style="left:6%;top:8%;width:9vmin;height:26vmin"></div><div class="win" style="left:86%;top:8%;width:9vmin;height:26vmin"></div>`+
+     [18,38,62,82].map(x=>`<div class="lamp" id="lamp${x}" style="left:${x}%;top:0"><div class="cord"></div><div class="shade"><span class="bulb"></span><span class="beam"></span></div></div>`).join('')+
+     `<div class="desk" style="left:2%;bottom:6%;width:22%;height:8%"></div><div class="desk" style="right:2%;bottom:6%;width:22%;height:8%"></div>`+
+     candle(10,86,1)+candle(92,88,1),
+ 4:()=>`<div style="position:absolute;inset:0;background:radial-gradient(1px 1px at 12% 14%,#fff 50%,#0000),radial-gradient(1.5px 1.5px at 30% 8%,#fff 50%,#0000),radial-gradient(1px 1px at 52% 18%,#fff 50%,#0000),radial-gradient(1.5px 1.5px at 74% 10%,#fff 50%,#0000),radial-gradient(1px 1px at 90% 22%,#fff 50%,#0000)"></div>`+
+     `<svg class="train" viewBox="0 0 400 140" style="left:14%;top:28%;width:60%"><g fill="#07080f"><rect x="40" y="60" width="190" height="42" rx="18"/><rect x="190" y="30" width="60" height="72"/><rect x="60" y="30" width="22" height="34"/><rect x="52" y="22" width="38" height="10"/><rect x="250" y="64" width="140" height="38"/><rect x="262" y="52" width="116" height="14"/></g><g fill="#07080f"><circle cx="90" cy="108" r="16"/><circle cx="140" cy="108" r="16"/><circle cx="196" cy="108" r="16"/><circle cx="290" cy="108" r="12"/><circle cx="340" cy="108" r="12"/></g><circle cx="38" cy="80" r="9" fill="#fff3c8" class="hl"/><g fill="#ffe9a855"><rect x="268" y="56" width="14" height="8"/><rect x="296" y="56" width="14" height="8"/><rect x="324" y="56" width="14" height="8"/></g></svg>`+
+     `<div class="door" id="door" style="left:84%;top:26%;width:13vmin;height:40vmin"><span class="lk"></span></div>`+
+     `<div class="fog" style="bottom:12%"></div><div class="fog" style="bottom:2%;animation-duration:31s"></div>`+
+     candle(8,92,1.3)+candle(40,94,1)
+};
+
+/* ---------------- ДАННЫЕ КОМНАТ ---------------- */
+const ROOMS=[
+{ name:'Зал треснувших зеркал', theme:'причины Гражданской войны', seal:'Печать Раскола',
+  intro:['Я — Хранитель. Когда-то я берёг эти дела. Но из памяти исчезли события 1917–1918 годов, и без них никто не поймёт, откуда пришла беда.',
+         'Чтобы выбраться, восстанови четыре дела и получи четыре печати. Касайся предметов: документы откроются. Всё нужное для ответа записано здесь, в архиве. Двигай мышью — это твой фонарь.',
+         'Начнём с Зала треснувших зеркал. Почему страна раскололась? Осмотри все предметы — потом попробуй собрать зеркало.'],
+  outro:['Зеркало цело. Я вижу своё отражение впервые за сто лет.','Война не взялась из ниоткуда: общество раскололось ещё до первых выстрелов. Идём дальше.'],
+  nextLabel:'Дальше: Кабинет протоколов ▸',
+  decor:DECOR[1],
+  items:[
+   {id:'mirror',x:50,y:47,w:42,tall:1,icon:'mirror',label:'Разбитое зеркало',doc:{title:'Справка № 1. Расколотая страна',date:'Осень 1917 – зима 1918',stamp:'АРХИВ',html:
+    `<p>В <mark>октябре 1917 г.</mark> в Петрограде к власти пришли <mark>большевики</mark>. Они объявили, что власть переходит к Советам, и сразу приняли два декрета: <mark>о мире</mark> (предложение прекратить мировую войну) и <mark>о земле</mark> (помещичьи земли объявлялись общенародным достоянием и переходили крестьянам без выкупа).</p>
+     <p>Но <mark>новую власть признали не все</mark>: часть офицерства, предпринимателей, чиновников, многие политические партии и часть казачества считали переворот незаконным. Одни видели в декрете о мире спасение от войны, другие — предательство союзников по Антанте. Владельцы земли и предприятий теряли собственность, и это порождало острую вражду между <mark>имущими и неимущими</mark>.</p>
+     <p>Общество раскололось, как это зеркало: каждая сторона считала себя защитницей России. Договориться становилось всё труднее.</p>`}},
+   {id:'news',x:19,y:68,w:17,icon:'news',label:'Газета, январь 1918',doc:{title:'Газета. Судьба Учредительного собрания',date:'Январь 1918 г.',stamp:'ЭКСТРЕННО',html:
+    `<p><mark>Учредительное собрание</mark> — всенародно избранный орган — должно было решить, какой быть власти в России. Оно открылось <mark>5 (18) января 1918 г.</mark> Большинство депутатов (эсеры) не поддержало декреты Советов и большевистскую власть.</p>
+     <p>В ночь на 6 (19) января охрана по распоряжению большевистского руководства прекратила заседание, а затем <mark>Собрание было распущено</mark> декретом ВЦИК. Многие противники большевиков сделали вывод: мирным, законным путём власть не сменить. Часть депутатов уехала на Волгу и в Сибирь, чтобы продолжить борьбу.</p>
+     <p>В эти же дни, в январе 1918 г., была создана <mark>Красная армия</mark> — вооружённая сила Советской власти.</p>`}},
+   {id:'cal',x:83,y:50,w:17,icon:'calendar',label:'Календарь с вырванными листами',doc:{title:'Календарь с вырванными листами',date:'Листы перемешаны',stamp:'ПОЗЖЕ',html:
+    `<p>На вырванных листах — события, которые произойдут <b>позже</b>.</p>
+     <ul><li><mark>8 июня 1918 г.</mark> — в Самаре образован <mark>КОМУЧ</mark> (Комитет членов Учредительного собрания): депутаты разогнанного Собрания создали собственную власть на Волге.</li>
+     <li><mark>1922 г.</mark> — завершаются бои на Дальнем Востоке, последние противники большевиков покидают Приморье. Гражданская война заканчивается.</li></ul>
+     <p><i>Запомни: причина происходит ДО конфликта и толкает к нему. То, что случилось позже, — уже следствие или итог.</i></p>`}}
+  ],
+  puzzle:{type:'pick',title:'Разбитое зеркало',ins:'В раме шесть осколков. Выбери <b>четыре</b> осколка, которые показывают подлинные причины углубления конфликта — то, что было ДО войны и подталкивало к ней.',need:4,btn:'Собрать зеркало',
+   options:['Непризнание большевистской власти частью общества.','Разгон Учредительного собрания.','Социальные и имущественные противоречия.','Споры о войне и мире.','Образование КОМУЧа.','Завершение войны на Дальнем Востоке.'],
+   correct:[0,1,2,3],
+   hints:{4:'КОМУЧ образован 8 июня 1918 г. — уже ПОСЛЕ разгона Собрания и как реакция на него (см. календарь). Это следствие конфликта, а не его причина.',
+          5:'Бои на Дальнем Востоке закончились в 1922 г. Итог войны не может быть причиной того, что случилось на пять лет раньше.'},
+   missing:'Не хватает настоящих причин. Перечитай справку у зеркала (непризнание власти, земля, мир, собственность) и газету (судьба Учредительного собрания).'},
+  fx(){const m=$('.it-mirror');if(m){m.innerHTML=ICONS.mirror_ok+'<span class="lbl">Восстановленное зеркало</span>';}}
+},
+{ name:'Кабинет проклятых протоколов', theme:'первые вооружённые столкновения', seal:'Печать Первых Боёв',
+  intro:['Свеча дрожит. Здесь лежат протоколы первых боёв. Когда слова закончились, люди взялись за оружие.',
+         'Изучи карту, портреты и бумаги на столе. Потом расставь по порядку четыре документа — события должны выстроиться во времени.'],
+  outro:['Часы на стене дрогнули и на миг пошли вперёд. Хронология восстановлена.','Но война уже вышла за пределы юга. Следующая комната — на колёсах.'],
+  nextLabel:'Дальше: Читальный зал ▸',
+  decor:DECOR[2],
+  items:[
+   {id:'map',x:30,y:50,w:24,icon:'map',label:'Карта юга России',doc:{title:'Карта юга России',date:'Зима 1917–1918',stamp:'СЕКРЕТНО',html:
+    `<p>Красными булавками отмечены <mark>Дон</mark> и <mark>Кубань</mark> — казачьи области. Именно здесь зимой 1917–1918 гг. сложились первые очаги вооружённого сопротивления большевикам.</p>
+     <p>В конце 1917 г. против новой власти выступили атаман войска Донского <mark>Каледин</mark> на Дону и атаман <mark>Дутов</mark> на Южном Урале.</p>
+     <p>В <mark>феврале 1918 г.</mark> красные отряды заняли <mark>Ростов-на-Дону</mark>. Добровольческая армия ушла из города на юг — к Кубани.</p>`}},
+   {id:'port',x:74,y:42,w:22,icon:'portraits',label:'Портреты генералов',doc:{title:'Галерея портретов',date:'Конец 1917 г.',stamp:'ЛИЧНОЕ ДЕЛО',html:
+    `<p><mark>Генерал Алексеев</mark> и <mark>генерал Корнилов</mark> в конце 1917 г. прибыли на Дон и начали формировать <mark>Добровольческую армию</mark> из офицеров, юнкеров и добровольцев — людей, не принявших новую власть.</p>
+     <p>Позже командование принял <mark>генерал Деникин</mark>. Участники этого движения впоследствии получили название «белых».</p>`}},
+   {id:'prot',x:52,y:73,w:25,icon:'papers',label:'Протоколы на столе',doc:{title:'Протоколы. Сводка событий',date:'1917–1918 гг.',stamp:'ПРОТОКОЛ',html:
+    `<ul><li><mark>Октябрь 1917 г.</mark> — приход большевиков к власти в Петрограде.</li>
+     <li><mark>Конец 1917 г.</mark> — выступления Каледина (Дон) и Дутова (Южный Урал); формирование Добровольческой армии (Алексеев, Корнилов).</li>
+     <li><mark>Январь 1918 г.</mark> — разгон Учредительного собрания, создание Красной армии.</li>
+     <li><mark>Февраль 1918 г.</mark> — красные занимают Ростов-на-Дону; начинается <mark>Первый Кубанский («Ледяной») поход</mark> Добровольческой армии.</li>
+     <li><mark>13 апреля 1918 г.</mark> — под Екатеринодаром погибает Корнилов; командование принимает Деникин.</li></ul>`}}
+  ],
+  puzzle:{type:'order',title:'Хронология документов',ins:'Даты на документах стёрты. Нажимай на карточки, чтобы разложить их на ленте времени от <b>самого раннего</b> события к самому позднему.',
+   cards:['Телеграмма: власть в Петрограде перешла к большевикам.','Приказ: генералы Алексеев и Корнилов набирают на Дону добровольцев.','Донесение: красные заняли Ростов-на-Дону, армия уходит на Кубань.','Рапорт: Корнилов убит под Екатеринодаром, армию возглавил Деникин.'],
+   hints:['Начало всего — смена власти в Петрограде. Без неё не было бы ни тех, кто против неё, ни армий. Ищи событие октября 1917 г.',
+          'Второй шаг — появление армии противников новой власти. Добровольческая армия начала формироваться ещё в конце 1917 г., до взятия Ростова красными.',
+          'Третьим идёт отход из Ростова на Кубань в феврале 1918 г. (начало Ледяного похода), он раньше гибели Корнилова.',
+          'Последним в этой цепи стоит гибель Корнилова 13 апреля 1918 г. — финал Ледяного похода.']},
+  fx(){const s=$('#stage');s.classList.add('lit');}
+},
+{ name:'Читальный зал погасших ламп', theme:'лето 1918: фронт расширяется', seal:'Печать Железной Дороги',
+  intro:['Лампы погасли... Весной 1918 года война пошла по рельсам: в неё вмешались и те, кто вообще не жил в России.',
+         'Осмотри телеграф, карту железной дороги и газету. Потом заполни пробелы в протоколе — и лампы загорятся.'],
+  outro:['Лампы вспыхнули одна за другой. Стало видно: война перестала быть только «южной».','Остался последний зал — платформа. Поезд уже ждёт.'],
+  nextLabel:'Дальше: Платформа ▸',
+  decor:DECOR[3],
+  items:[
+   {id:'tg',x:24,y:66,w:18,icon:'telegram',label:'Телеграфная лента',doc:{title:'Телеграфная лента',date:'3 марта 1918 г.',stamp:'ТЕЛЕГРАММА',html:
+    `<p>Россия вела мировую войну против Германии и её союзников. Большевики добивались мира, но на условиях, которые многие сочли тяжёлыми.</p>
+     <p><mark>3 марта 1918 г.</mark> в городе Брест-Литовске подписан <mark>Брестский мир</mark> с Германией: Россия выходила из войны, но теряла огромные территории (Польша, Прибалтика, часть Белоруссии и Украины). Это вызвало протесты противников большевиков и недовольство союзников России по <mark>Антанте</mark> (Англия, Франция): ведь война против Германии на Западе продолжалась.</p>`}},
+   {id:'rail',x:50,y:40,w:27,icon:'rail',label:'Карта Транссибирской магистрали',doc:{title:'Карта Транссибирской магистрали',date:'Весна 1918 г.',stamp:'ЖЕЛ. ДОРОГА',html:
+    `<p><mark>Чехословацкий корпус</mark> — воинская часть из чехов и словаков, бывших солдат Австро-Венгрии, которые оказались в плену в России и хотели воевать за свою независимость на стороне Антанты.</p>
+     <p>После Брестского мира корпус должен был по железной дороге пересечь Сибирь, добраться до <mark>Владивостока</mark> и морем отплыть во Францию. Эшелоны растянулись на тысячи километров вдоль <mark>Транссиба</mark>.</p>
+     <p>В <mark>конце мая 1918 г.</mark> из-за конфликта с местными Советами (требование разоружить корпус) чехословаки подняли мятеж и за несколько недель взяли под контроль значительную часть магистрали — от Волги до Сибири.</p>`}},
+   {id:'sam',x:78,y:65,w:18,icon:'news',label:'Самарская газета, июнь 1918',doc:{title:'Самарская газета',date:'Июнь 1918 г.',stamp:'ВЕСТИ С ВОЛГИ',html:
+    `<p><mark>8 июня 1918 г.</mark> в Самаре при поддержке чехословаков власть взял <mark>КОМУЧ</mark> — Комитет членов Учредительного собрания, созданный эсерами, бывшими депутатами. Комитет объявил, что восстанавливает власть разогнанного Собрания.</p>
+     <p>Одновременно началась <mark>иностранная интервенция</mark>: весной 1918 г. британские войска высадились в <mark>Мурманске</mark>, а в апреле — японские и британские в <mark>Владивостоке</mark>. Страны Антанты опасались, что военные склады достанутся Германии, и стали поддерживать противников большевиков.</p>`}}
+  ],
+  puzzle:{type:'cloze',title:'Протокол с пробелами',ins:'Чернила расплылись. Выбери в каждом пробеле правильный вариант — ответы есть в телеграмме, на карте и в газете.',
+   text:`<p>3 марта 1918 г. был подписан {0} мир с Германией, и Россия вышла из мировой войны.</p>
+         <p>По Транссибу к Владивостоку двигался {1} корпус, который в конце мая 1918 г. выступил против Советов.</p>
+         <p>8 июня 1918 г. в Самаре власть взял {2}, созданный бывшими депутатами Учредительного собрания.</p>
+         <p>Весной 1918 г. британские войска высадились в {3}, и началась иностранная интервенция.</p>`,
+   gaps:[{opts:['Версальский','Брестский','Портсмутский'],ans:1,hint:'Мир подписан в городе Брест-Литовск — загляни в телеграфную ленту.'},
+         {opts:['Добровольческий','Красный','Чехословацкий'],ans:2,hint:'Речь о воинской части чехов и словаков, ехавшей по Транссибу — см. карту магистрали. Добровольческая армия действовала на юге.'},
+         {opts:['Совнарком','КОМУЧ','Ставка'],ans:1,hint:'Орган назван в самарской газете: Комитет членов Учредительного собрания (КОМУЧ).'},
+         {opts:['Екатеринодаре','Оренбурге','Мурманске'],ans:2,hint:'Британцы высадились на севере страны — в Мурманске. Екатеринодар (Кубань) и Оренбург (Урал) — совсем другие места.'}]},
+  fx(){document.querySelectorAll('.lamp').forEach((l,i)=>setTimeout(()=>{l.classList.add('lit');sfx('click')},i*350));$('#stage').classList.add('lit');}
+},
+{ name:'Платформа призрачного поезда', theme:'стороны конфликта и итоги', seal:'Печать Итогов',
+  intro:['Платформа. Поезд, которого нет ни в одном расписании. Это последняя станция — за ней дверь на волю.',
+         'Здесь едут все стороны начавшейся войны. Осмотри билеты, табличку паровоза и журнал начальника станции, а потом распредели пассажиров по вагонам.'],
+  outro:['Дверь открывается. Четыре печати горят на ней.'],
+  nextLabel:'Открыть последнюю дверь ▸',
+  decor:DECOR[4],
+  items:[
+   {id:'tk',x:22,y:68,w:18,icon:'tickets',label:'Билеты и список пассажиров',doc:{title:'Список пассажиров',date:'Поезд № 1918',stamp:'ВАГОНЫ',html:
+    `<ul><li><b>Вагон 1.</b> Красная армия. Создана в январе 1918 г. как вооружённая сила большевистской (Советской) власти.</li>
+     <li><b>Вагон 2.</b> Добровольческая армия. Офицеры и юнкеры на Дону и Кубани; командовали Алексеев, Корнилов, затем Деникин. Опора «белого» движения на юге.</li>
+     <li><b>Вагон 3.</b> КОМУЧ. Самарская власть бывших депутатов Учредительного собрания, июнь 1918 г.; опирался на Чехословацкий корпус.</li>
+     <li><b>Вагон 4.</b> Войска Антанты. Высадки в Мурманске и Владивостоке весной 1918 г.</li></ul>`}},
+   {id:'pl',x:52,y:56,w:20,icon:'plaque',label:'Табличка паровоза',doc:{title:'Табличка: «Начало войны. 1917–1918»',date:'Станции пути',stamp:'ИТОГ ПУТИ',html:
+    `<p>Гражданская война началась не одним выстрелом, а цепью событий:</p>
+     <ul><li><b>Станция «Раскол».</b> Революция 1917 г.: общество не признаёт власть большевиков, спорит о земле, собственности, мире.</li>
+     <li><b>Станция «Первые очаги».</b> Дон, Кубань, Южный Урал; создаются Красная и Добровольческая армии; Ледяной поход.</li>
+     <li><b>Станция «Лето 1918».</b> Брестский мир, мятеж Чехословацкого корпуса, КОМУЧ, интервенция — фронт растёт.</li></ul>`}},
+   {id:'lg',x:77,y:72,w:17,icon:'book',label:'Журнал начальника станции',doc:{title:'Журнал начальника станции',date:'Записи без даты',stamp:'ЦЕНА',html:
+    `<p>«Эта война идёт не между разными странами, а внутри одного народа: соседи, братья, бывшие однополчане оказались по разные стороны фронта».</p>
+     <p>Война шла несколько лет и закончилась только в <mark>1922 г.</mark> на Дальнем Востоке. Она унесла миллионы жизней — в боях, от голода и эпидемий, — а сотни тысяч людей навсегда покинули страну.</p>
+     <p>Помни: у каждой стороны были свои аргументы и свои потери. Понять их — значит понять причины трагедии.</p>`}}
+  ],
+  puzzle:{type:'match',title:'Распредели пассажиров',ins:'Выбери вагон слева, затем подходящее описание справа. Нужно верно соединить все четыре пары.',
+   left:['Красная армия','Добровольческая армия','КОМУЧ','Войска Антанты'],
+   right:['Создана в январе 1918 г. как вооружённая сила большевистской власти.','Армия на Дону и Кубани; руководили Алексеев и Корнилов, затем Деникин.','Самарская власть бывших депутатов Учредительного собрания, июнь 1918 г.','Британские и японские отряды, высадившиеся в Мурманске и Владивостоке.'],
+   hints:['Красная армия — вооружённая сила Советской власти, созданная по декрету в январе 1918 г. (см. газету Комнаты 1 и список пассажиров).',
+          'Добровольческая армия — это Дон и Кубань, Алексеев, Корнилов, Деникин. Вспомни портреты и протоколы Комнаты 2.',
+          'КОМУЧ — Самара, июнь 1918 г., бывшие депутаты разогнанного Учредительного собрания (см. газету и календарь).',
+          'Войска Антанты — это иностранные части: Мурманск и Владивосток, весна 1918 г.']},
+  fx(){const d=$('#door');if(d){d.classList.add('open');}sfx('door');setTimeout(()=>sfx('whistle'),1200);}
+}
+];
+
+/* ---------------- СОСТОЯНИЕ ---------------- */
+const S={room:-1,read:[new Set(),new Set(),new Set(),new Set()],seals:[0,0,0,0],err:[0,0,0,0],solved:[0,0,0,0],t0:0,docs:[]};
+
+/* ---------------- ОВЕРЛЕИ ---------------- */
+function overlay(html,cls){
+  const o=document.createElement('div');o.className='overlay '+(cls||'');
+  o.innerHTML=`<div class="box">${html}</div>`;
+  o.addEventListener('click',e=>{if(e.target===o)closeO(o);});
+  $('#app').appendChild(o);
+  o.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeO(o));
+  requestAnimationFrame(()=>o.classList.add('show'));
+  return o;
+}
+function closeO(o){o.classList.remove('show');setTimeout(()=>o.remove(),260);}
+function openDoc(d){
+  sfx('paper');
+  overlay(`<div class="doc"><div class="stamp">${d.stamp||'АРХИВ'}</div><h2>${d.title}</h2><div class="date">${d.date}</div>${d.html}<button class="btn" data-close>Закрыть</button></div>`);
+}
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),3200);}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const os=document.querySelectorAll('.overlay.show');if(os.length)closeO(os[os.length-1]);}});
+
+/* ---------------- ХРАНИТЕЛЬ ---------------- */
+let sayTimer=null;
+function say(lines,done){
+  if(typeof lines==='string')lines=[lines];
+  const k=$('#keeper'),t=$('#ktext'),b=$('#knext');let idx=0;
+  k.classList.add('show');sfx('whisper');
+  function finish(){clearInterval(sayTimer);t.textContent=lines[idx];b.style.visibility='visible';b.textContent=idx<lines.length-1?'Далее ▸':'Понятно';}
+  function show(){
+    const full=lines[idx];let n=0;clearInterval(sayTimer);b.style.visibility='hidden';t.textContent='';
+    sayTimer=setInterval(()=>{n+=2;t.textContent=full.slice(0,n);if(n>=full.length)finish();},22);
+  }
+  b.onclick=e=>{e.stopPropagation();idx++;if(idx<lines.length)show();else{k.classList.remove('show');if(done)done();}};
+  k.onclick=e=>{if(e.target!==b&&b.style.visibility==='hidden')finish();};
+  show();
+}
+
+/* ---------------- ЭФФЕКТЫ ---------------- */
+function shake(){const s=$('#stage');s.classList.remove('shake');void s.offsetWidth;s.classList.add('shake');}
+function flash(col,ms){const f=$('#flash');f.style.background=col||'#fff';f.style.transition='none';f.style.opacity=.85;setTimeout(()=>{f.style.transition='opacity '+(ms||700)+'ms';f.style.opacity=0;},60);}
+function blackout(){const f=$('#flash');f.style.background='#000';f.style.transition='none';f.style.opacity=1;sfx('creak');setTimeout(()=>{f.style.opacity=.2;},110);setTimeout(()=>{f.style.opacity=1;},210);setTimeout(()=>{f.style.transition='opacity .4s';f.style.opacity=0;},330);}
+const GHOSTSVG='<svg viewBox="0 0 100 190"><defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfeff5" stop-opacity=".9"/><stop offset="1" stop-color="#cfeff5" stop-opacity="0"/></linearGradient></defs><path d="M50 6C28 8 22 28 24 50c1 14-8 30-16 100-2 16 6 34 14 28s12 6 28 0 20 6 28 0 18-14 14-28C84 80 76 64 76 50 78 28 72 8 50 6z" fill="url(#gg)"/><ellipse cx="50" cy="44" rx="12" ry="15" fill="#04080a"/><circle cx="45" cy="42" r="2.4" fill="#fff"/><circle cx="55" cy="42" r="2.4" fill="#fff"/></svg>';
+function ghost(){
+  const g=document.createElement('div');g.className='ghost';g.style.top=(14+Math.random()*34)+'%';g.style.animationDuration=(8+Math.random()*5)+'s';
+  g.innerHTML=GHOSTSVG;$('#ghosts').appendChild(g);setTimeout(()=>g.remove(),14000);sfx('creak');
+}
+const WH=['…помни…','…мы не успели…','…читай внимательно…','…1917…','…не оставляй нас в тишине…','…кто виноват?…','…верни нам память…'];
+function whisper(){
+  const w=document.createElement('div');w.className='whisper';w.textContent=WH[Math.floor(Math.random()*WH.length)];
+  w.style.left=(8+Math.random()*60)+'%';w.style.top=(20+Math.random()*50)+'%';$('#ghosts').appendChild(w);setTimeout(()=>w.remove(),4200);sfx('whisper');
+}
+function scare(){
+  if(S.room<0||document.querySelector('#end').style.display==='flex')return;
+  const r=Math.random();
+  if(r<.4)ghost();else if(r<.8)whisper();else blackout();
+}
+(function loop(){setTimeout(()=>{scare();loop();},12000+Math.random()*12000);})();
+
+/* пыль */
+const cv=$('#fx'),cx=cv.getContext('2d');let W,H;const P=[];
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+addEventListener('resize',rs);rs();
+for(let i=0;i<70;i++)P.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.8+.4,vx:(Math.random()-.5)*.15,vy:-Math.random()*.2-.03,a:Math.random()*6});
+(function dust(){cx.clearRect(0,0,W,H);for(const p of P){p.x+=p.vx;p.y+=p.vy;p.a+=.01;if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}if(p.x<-5)p.x=W+5;if(p.x>W+5)p.x=-5;cx.globalAlpha=.25+.25*Math.sin(p.a);cx.fillStyle='#ffe2a8';cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill();}requestAnimationFrame(dust);})();
+
+/* фонарь */
+addEventListener('pointermove',e=>{const d=$('#dark');d.style.setProperty('--mx',e.clientX+'px');d.style.setProperty('--my',e.clientY+'px');});
+
+/* часы идут назад */
+setInterval(()=>{if(!S.t0)return;const e=Math.floor((Date.now()-S.t0)/1000);let r=86400-e;const h=Math.floor(r/3600)%24,m=Math.floor(r%3600/60),s=r%60;$('#ct').textContent=[h,m,s].map(v=>String(v).padStart(2,'0')).join(':');},1000);
+
+/* ---------------- ХОД ИГРЫ ---------------- */
+function hud(){
+  const R=ROOMS[S.room];
+  $('#rt').textContent=`Комната ${S.room+1}. ${R.name}`;
+  $('#rs').textContent=`Тема: ${R.theme}`;
+  $('#seals').innerHTML=S.seals.map((v,i)=>`<span class="seal" title="${ROOMS[i].seal}">${v?SEALSVG(i):ROM[i]}</span>`).join('');
+  const n=S.read[S.room].size,t=R.items.length,pz=$('#pz');
+  pz.style.display=S.solved[S.room]?'none':'block';
+  pz.textContent=`🗝 Решить загадку · улики ${n}/${t}`;
+  pz.classList.toggle('dim',n<t);
+}
+function veilTo(fn){const v=$('#veil');v.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>v.classList.remove('on'),150);},750);}
+function enterRoom(i){
+  S.room=i;const R=ROOMS[i];
+  const st=$('#stage');st.className='r'+(i+1);
+  $('#decor').innerHTML=R.decor();$('#items').innerHTML='';$('#ghosts').innerHTML='';
+  $('#next').style.display='none';
+  R.items.forEach(it=>{
+    const b=document.createElement('button');b.className='item new it-'+it.id+(it.tall?' tall':'');
+    b.style.cssText=`left:${it.x}%;top:${it.y}%;--w:${it.w}vmin`;
+    b.innerHTML=ICONS[it.icon]+`<span class="lbl">${it.label}</span>`;
+    b.onclick=()=>openItem(it,b);$('#items').appendChild(b);
+  });
+  $('#hud').style.display='flex';hud();sfx('creak');
+  setTimeout(()=>say(R.intro),600);
+}
+function openItem(it,b){
+  openDoc(it.doc);
+  const set=S.read[S.room];
+  if(!set.has(it.id)){set.add(it.id);S.docs.push({room:S.room,doc:it.doc});}
+  b.classList.remove('new');b.classList.add('read');
+  hud();
+  if(set.size===ROOMS[S.room].items.length&&!S.solved[S.room]){
+    $('#stage').classList.add('found');
+    setTimeout(()=>toast('Все улики найдены! Теперь можно решить загадку комнаты.'),600);
+  }
+}
+$('#pz').onclick=()=>{
+  const R=ROOMS[S.room];
+  if(S.read[S.room].size<R.items.length){sfx('bad');toast('Хранитель шепчет: «Сначала осмотри все предметы в комнате…»');return;}
+  sfx('click');openPuzzle(R.puzzle);
+};
+function openJournal(){
+  sfx('paper');
+  if(!S.docs.length){toast('Дневник пока пуст — найди документы.');return;}
+  const o=overlay(`<div class="pz"><h2>📜 Дневник находок</h2><p class="ins">Здесь хранятся все найденные документы. Нажми, чтобы перечитать.</p><div id="jl" style="display:grid;gap:1vmin"></div><div class="row"><button class="btn" data-close>Закрыть</button></div></div>`);
+  const jl=o.querySelector('#jl');
+  S.docs.forEach(d=>{const b=document.createElement('button');b.className='btn ghostb';b.style.textAlign='left';b.textContent=`Комн. ${d.room+1} · ${d.doc.title}`;b.onclick=()=>openDoc(d.doc);jl.appendChild(b);});
+}
+$('#bj').onclick=openJournal;
+$('#bs').onclick=()=>{AU.on=!AU.on;if(AU.out)AU.out.gain.value=AU.on?.7:0;$('#bs').textContent=AU.on?'🔊':'🔇';};
+
+/* ---------------- ГОЛОВОЛОМКИ ---------------- */
+function pzShell(P,extra,btnText){
+  return `<div class="pz"><h2>${P.title}</h2><p class="ins">${P.ins}</p>${extra}<div class="fb" id="fb"></div><div class="row">${btnText?`<button class="btn" id="chk">${btnText}</button>`:''}<button class="btn ghostb" id="jr">📜 Дневник</button><button class="btn ghostb" data-close>Вернуться в комнату</button></div></div>`;
+}
+function fb(o,txt,kind){const f=o.querySelector('#fb');f.className='fb show '+(kind||'');f.innerHTML=txt;}
+function wrong(o,txt){
+  S.err[S.room]++;sfx('bad');shake();flash('#600',500);
+  const extra=S.err[S.room]>=3?' <br><i>Совет Хранителя: открой дневник 📜 и перечитай документы — ответ записан там.</i>':'';
+  fb(o,txt+extra,'bad');
+}
+function openPuzzle(P){
+  if(P.type==='pick')pzPick(P);else if(P.type==='order')pzOrder(P);else if(P.type==='cloze')pzCloze(P);else pzMatch(P);
+}
+function pzPick(P){
+  const sel=new Set();const order=shuffle(P.options.map((_,i)=>i));
+  const o=overlay(pzShell(P,`<div class="shards">${order.map(i=>`<div class="shw"><button class="shard s${i}" data-i="${i}">${P.options[i]}</button></div>`).join('')}</div><div class="cnt">Выбрано: <b id="cn">0</b> / ${P.need}</div>`,P.btn),'');
+  o.querySelector('#jr').onclick=openJournal;
+  o.querySelectorAll('.shard').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;sfx('click');
+    if(sel.has(i)){sel.delete(i);b.parentNode.classList.remove('sel');}
+    else if(sel.size<P.need){sel.add(i);b.parentNode.classList.add('sel');}
+    o.querySelector('#cn').textContent=sel.size;
+  });
+  o.querySelector('#chk').onclick=()=>{
+    if(sel.size!==P.need){fb(o,`Нужно выбрать ровно ${P.need} осколка.`);return;}
+    const bad=[...sel].filter(i=>!P.correct.includes(i));
+    if(!bad.length){fb(o,'Осколки встали на места!','ok');solve(o);}
+    else wrong(o,'Не все осколки верны. '+(P.hints[bad[0]]||P.missing));
+  };
+}
+function pzOrder(P){
+  let pool=shuffle([0,1,2,3]);while(pool.every((v,i)=>v===i))pool=shuffle([0,1,2,3]);
+  const lab={};pool.forEach((c,i)=>lab[c]='Документ '+'АБВГ'[i]);
+  const slots=[null,null,null,null];
+  const o=overlay(pzShell(P,`<div class="timeline"><span>раньше</span><div id="slots"></div><span>позже</span></div><div id="pool"></div>`,'Проверить порядок'));
+  o.querySelector('#jr').onclick=openJournal;
+  const card=(c,attr)=>`<div class="card" ${attr}><b>${lab[c]}</b>${P.cards[c]}</div>`;
+  function draw(){
+    o.querySelector('#slots').innerHTML=slots.map((c,k)=>`<div class="slot">${c!==null?card(c,`data-s="${k}"`):`<i>${k+1}</i>`}</div>`).join('');
+    o.querySelector('#pool').innerHTML=pool.filter(c=>!slots.includes(c)).map(c=>card(c,`data-c="${c}"`)).join('');
+    o.querySelectorAll('[data-c]').forEach(e=>e.onclick=()=>{const k=slots.indexOf(null);if(k<0)return;slots[k]=+e.dataset.c;sfx('paper');draw();});
+    o.querySelectorAll('[data-s]').forEach(e=>e.onclick=()=>{slots[+e.dataset.s]=null;sfx('paper');draw();});
+  }
+  draw();
+  o.querySelector('#chk').onclick=()=>{
+    if(slots.includes(null)){fb(o,'Разложи все четыре документа на ленте.');return;}
+    const p=slots.findIndex((c,k)=>c!==k);
+    if(p<0){fb(o,'Хронология восстановлена!','ok');solve(o);}
+    else wrong(o,`Место № ${p+1} занято неверно. `+P.hints[p]);
+  };
+}
+function pzCloze(P){
+  const html=P.text.replace(/\{(\d)\}/g,(m,i)=>`<select data-g="${i}"><option value="-1">— выбери —</option>${P.gaps[i].opts.map((t,k)=>`<option value="${k}">${t}</option>`).join('')}</select>`);
+  const o=overlay(pzShell(P,`<div class="cloze">${html}</div>`,'Проверить протокол'));
+  o.querySelector('#jr').onclick=openJournal;
+  o.querySelectorAll('select').forEach(s=>s.onchange=()=>{s.classList.remove('bad');sfx('click');});
+  o.querySelector('#chk').onclick=()=>{
+    const msgs=[];let okAll=true;
+    o.querySelectorAll('select').forEach(s=>{
+      const g=P.gaps[+s.dataset.g];
+      if(+s.value===g.ans){s.classList.remove('bad');s.classList.add('ok');s.disabled=true;}
+      else{okAll=false;s.classList.add('bad');msgs.push(`<b>Пробел ${+s.dataset.g+1}.</b> ${+s.value<0?'Выбери вариант. ':''}${g.hint}`);}
+    });
+    if(okAll){fb(o,'Протокол восстановлен!','ok');solve(o);}
+    else wrong(o,msgs.join('<br>'));
+  };
+}
+function pzMatch(P){
+  const rorder=shuffle(P.right.map((_,i)=>i));let selL=null;const done=new Set();
+  const o=overlay(pzShell(P,`<div class="match" id="mg"></div>`,null));
+  o.querySelector('#jr').onclick=openJournal;
+  function draw(){
+    const g=o.querySelector('#mg');
+    let h='';
+    for(let k=0;k<P.left.length;k++){
+      const i=k,r=rorder[k];
+      h+=`<div class="mt l ${done.has(i)?'ok':''} ${selL===i?'sel':''}" data-l="${i}" ${done.has(i)?`data-n="✓"`:''}>${P.left[i]}</div>`;
+      h+=`<div class="mt r ${done.has(r)?'ok':''}" data-r="${r}" ${done.has(r)?`data-n="✓"`:''}>${P.right[r]}</div>`;
+    }
+    g.innerHTML=h;
+    g.querySelectorAll('[data-l]').forEach(e=>e.onclick=()=>{const i=+e.dataset.l;if(done.has(i))return;selL=i;sfx('click');draw();});
+    g.querySelectorAll('[data-r]').forEach(e=>e.onclick=()=>{
+      const r=+e.dataset.r;if(done.has(r))return;
+      if(selL===null){fb(o,'Сначала выбери вагон в левом столбце.');return;}
+      if(r===selL){done.add(r);selL=null;sfx('good');fb(o,'Верно!','ok');draw();if(done.size===P.left.length){solve(o);}}
+      else{const h=P.hints[selL];selL=null;wrong(o,h);draw();}
+    });
+  }
+  draw();
+}
+
+/* ---------------- УСПЕХ ---------------- */
+function solve(o){
+  const i=S.room,R=ROOMS[i];
+  S.solved[i]=1;S.seals[i]=1;
+  setTimeout(()=>{closeO(o);document.querySelectorAll('.overlay').forEach(x=>closeO(x));
+    flash('#fff4cf',900);sfx('good');
+    setTimeout(()=>{
+      const sf=$('#sealfx');sf.innerHTML=`<div class="big">${SEALSVG(i)}</div><h3>Получена печать: ${R.seal}</h3>`;sf.classList.add('show');sfx('seal');
+      R.fx();hud();
+      setTimeout(()=>{sf.classList.remove('show');
+        say(R.outro,()=>{
+          const nb=$('#next');nb.textContent=R.nextLabel;nb.style.display='block';
+          nb.onclick=()=>{nb.style.display='none';if(i<3){sfx('door');veilTo(()=>enterRoom(i+1));}else{sfx('door');flash('#fff',1800);setTimeout(ending,1200);}};
+        });
+      },2800);
+    },700);
+  },900);
+}
+
+/* ---------------- ФИНАЛ ---------------- */
+function ending(){
+  const el=$('#end');const sec=Math.floor((Date.now()-S.t0)/1000);
+  const mm=Math.floor(sec/60),ss=String(sec%60).padStart(2,'0');
+  const errs=S.err.reduce((a,b)=>a+b,0);
+  el.innerHTML=`<h1>ДЕЛО № 1918 ЗАКРЫТО</h1>
+  <div class="seals" style="display:flex;gap:2vmin;margin:2vmin 0">${[0,1,2,3].map(i=>`<div style="width:11vmin;min-width:60px">${SEALSVG(i)}</div>`).join('')}</div>
+  <div class="ch"><p><i>Хранитель: «Двери открыты, свеча гаснет — а память остаётся. Ты вернул ей то, что она потеряла».</i></p>
+  <h3>Что мы восстановили</h3>
+  <ul><li>Гражданская война выросла из раскола общества после революции 1917 г.: часть общества не признала власть большевиков, был разогнан Учредительное собрание, остро спорили о земле, собственности, войне и мире.</li>
+  <li>Первые очаги вооружённой борьбы возникли на Дону, Кубани и Южном Урале; появились Красная и Добровольческая армии, прошёл Первый Кубанский (Ледяной) поход.</li>
+  <li>Летом 1918 г. фронт расширился: Брестский мир, мятеж Чехословацкого корпуса, образование КОМУЧа, интервенция Антанты.</li>
+  <li>Война шла внутри одного народа, унесла миллионы жизней и закончилась на Дальнем Востоке в 1922 г.</li></ul>
+  <h3>Вопросы для обсуждения</h3>
+  <ul><li>Можно ли было остановить раскол мирным путём? Какие события сделали это труднее всего?</li>
+  <li>Почему разгон Учредительного собрания многие противники большевиков восприняли как повод к борьбе?</li>
+  <li>Как вмешательство внешних сил (Брестский мир, интервенция) повлияло на ход войны?</li></ul></div>
+  <div class="st"><div><b>${mm}:${ss}</b>время игры</div><div><b>${errs}</b>ошибок в ответах</div><div><b>${S.docs.length}</b>документов найдено</div></div>
+  <button class="btn big" onclick="location.reload()">Сыграть снова</button>`;
+  el.style.display='flex';$('#hud').style.display='none';$('#pz').style.display='none';
+}
+
+/* ---------------- СТАРТ ---------------- */
+const CINE=['31 октября. Заброшенный архив на окраине города.','Двери захлопнулись за твоей спиной. Свечи вспыхнули сами собой.','Часы на стене пошли назад. Бумаги на столах шевелятся, будто дышат.','Где-то в глубине зала тихо скрипнула дверь…'];
+$('#start').onclick=()=>{
+  auInit();S.t0=Date.now();
+  $('#title').style.display='none';
+  const c=$('#cine'),cl=$('#cl');c.style.display='flex';let idx=0,timer=null;
+  function show(){
+    const full=CINE[idx];let n=0;clearInterval(timer);cl.textContent='';sfx('creak');
+    timer=setInterval(()=>{n+=1;cl.textContent=full.slice(0,n);if(n>=full.length)clearInterval(timer);},38);
+    c._full=full;
+  }
+  c.onclick=()=>{
+    if(cl.textContent.length<c._full.length){clearInterval(timer);cl.textContent=c._full;return;}
+    idx++;
+    if(idx<CINE.length)show();
+    else{c.style.display='none';c.onclick=null;$('#veil').classList.add('on');setTimeout(()=>{enterRoom(0);$('#veil').classList.remove('on');},300);}
+  };
+  show();
+};
+</script>
+</body>
+</html>
